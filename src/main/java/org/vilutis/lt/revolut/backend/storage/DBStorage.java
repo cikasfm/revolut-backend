@@ -102,9 +102,7 @@ public class DBStorage {
         // Finally, we create the PoolingDriver itself,
         // passing in the object pool we created.
         //
-        PoolingDataSource<PoolableConnection> dataSource = new PoolingDataSource<>(connectionPool);
-
-        return dataSource;
+        return new PoolingDataSource<>(connectionPool);
     }
 
 }

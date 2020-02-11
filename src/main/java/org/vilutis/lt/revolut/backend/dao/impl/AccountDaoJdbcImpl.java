@@ -33,7 +33,7 @@ public class AccountDaoJdbcImpl implements AccountDAO {
     private ArrayList<Account> findAll(int pageNum, int pageSize, Connection connection) throws SQLException {
         Assert.isTrue(pageNum >= 0,  "pageNum must be positive");
         Assert.isTrue(pageSize > 0,  "pageSize must be more than zero");
-        ArrayList<Account> result = new ArrayList();
+        ArrayList<Account> result = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(
                 " SELECT accountNumber, accountName, balance "
                         + " FROM account "
@@ -53,10 +53,9 @@ public class AccountDaoJdbcImpl implements AccountDAO {
 
     @Override
     public Account findByAccountNumber(Long accountNumber) {
+        Assert.notNull(accountNumber, "accountNumber must be not null");
         try {
-            return dbStorage.runSQL(connection -> {
-                return findAccountByNumber(accountNumber, connection);
-            });
+            return dbStorage.runSQL(connection -> findAccountByNumber(accountNumber, connection));
         } catch (SQLException ex) {
             throw ExceptionHelper.convertException(ex);
         }
@@ -87,6 +86,7 @@ public class AccountDaoJdbcImpl implements AccountDAO {
 
     @Override
     public Account create(String accountName) {
+        Assert.hasLength(accountName, "account name must not be empty");
         try {
             return dbStorage.runInTransaction(connection -> create(accountName, connection));
         } catch (SQLException ex) {
@@ -97,8 +97,8 @@ public class AccountDaoJdbcImpl implements AccountDAO {
     private Account create(String accountName, Connection connection) throws SQLException {
         try (PreparedStatement insertAccountStmt = connection.prepareStatement(
                 " INSERT INTO account ( "
-                        + " accountNumber, accountName, balance ) "
-                        + " VALUES ( NULL, ?, NULL ) ",
+                        + " accountNumber, accountName ) "
+                        + " VALUES ( NULL, ? ) ",
                 Statement.RETURN_GENERATED_KEYS)) {
 
             insertAccountStmt.setString(1, accountName);

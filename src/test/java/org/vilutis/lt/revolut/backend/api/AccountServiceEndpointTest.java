@@ -28,8 +28,6 @@ import static org.mockito.Mockito.when;
 public class AccountServiceEndpointTest {
 
     private static AccountServiceEndpoint endpoint;
-    private static DBStorage dbStorage;
-    private static AccountDAO accountDAO;
     private static Account[] testAccounts;
 
     @BeforeClass
@@ -47,7 +45,7 @@ public class AccountServiceEndpointTest {
         }
         System.out.println("Done.");
 
-        int localPort = 0;
+        int localPort;
 
         // find a random available port
         try (ServerSocket s = new ServerSocket(0)) {
@@ -58,9 +56,9 @@ public class AccountServiceEndpointTest {
 
         Spark.port(localPort);
 
-        dbStorage = new DBStorage("jdbc:h2:mem:test", true);
+        DBStorage dbStorage = new DBStorage("jdbc:h2:mem:test", true);
 
-        accountDAO = new AccountDaoJdbcImpl(dbStorage);
+        AccountDAO accountDAO = new AccountDaoJdbcImpl(dbStorage);
 
         endpoint = new AccountServiceEndpoint(accountDAO);
 
@@ -93,7 +91,7 @@ public class AccountServiceEndpointTest {
         assertThat(standardResponse.message, equalTo("OK"));
         assertThat(standardResponse.data, isA(ArrayList.class));
 
-        assertThat(standardResponse.data.size(), equalTo(3));
+        assertThat("there must be 3 or more results", standardResponse.data.size() >= 3);
     }
 
     @Test
@@ -115,7 +113,10 @@ public class AccountServiceEndpointTest {
         assertThat("response message", standardResponse.message, equalTo("OK"));
         assertThat("response data", standardResponse.data, isA(Account.class));
 
-        assertThat("accountNumber", standardResponse.data.getAccountNumber(), equalTo(testAccounts[0].getAccountNumber()));
-        assertThat("accountName", standardResponse.data.getAccountName(), equalTo(testAccounts[0].getAccountName()));
+        assertThat("accountNumber must match", standardResponse.data.getAccountNumber(),
+                equalTo(testAccounts[0].getAccountNumber()));
+        assertThat("accountName must match", standardResponse.data.getAccountName(), equalTo(testAccounts[0].getAccountName()));
+        assertThat("balance must match", standardResponse.data.getBalance(),
+                equalTo(testAccounts[0].getBalance()));
     }
 }

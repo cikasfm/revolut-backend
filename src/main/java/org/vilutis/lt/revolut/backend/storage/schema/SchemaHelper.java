@@ -28,7 +28,7 @@ public interface SchemaHelper {
             logger.info("START: setupSchema - creating tables");
             try ( Statement statement = connection.createStatement() ) {
                 statement.execute(
-                        "CREATE TABLE account ( "
+                        "CREATE TABLE IF NOT EXISTS account ( "
                                 + " accountNumber IDENTITY NOT NULL PRIMARY KEY, "
                                 + " accountName VARCHAR NOT NULL, "
                                 + " balance DECIMAL(20, 2) "

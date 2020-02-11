@@ -13,6 +13,8 @@ public class Account implements Serializable {
 
     private static final int SCALE = 2;
 
+    private static final BigDecimal ZERO = BigDecimal.ZERO.setScale(SCALE, RoundingMode.HALF_UP);
+
     /**
      * Account number. Must be unique
      */
@@ -26,14 +28,14 @@ public class Account implements Serializable {
     /**
      * Account balance in local currency.
      */
-    private BigDecimal balance;
+    private BigDecimal balance = ZERO;
 
     /**
      * Creates an
      * @param accountNumber the {@link #accountNumber} to set
      * @throws IllegalArgumentException if the param accountNumber is null
      */
-    public Account(Long accountNumber) {
+    private Account(Long accountNumber) {
         Assert.notNull(accountNumber, "Param accountNumber cannot be null");
         this.accountNumber = accountNumber;
     }
@@ -106,7 +108,7 @@ public class Account implements Serializable {
     }
 
     /**
-     * Generated {@link #toString()} method
+     * Generated toString() method
      * @return a String representation of the {@link Account} instance
      */
     @Override

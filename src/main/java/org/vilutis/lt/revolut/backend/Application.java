@@ -26,7 +26,7 @@ public class Application {
         }
         System.out.println("Done.");
 
-        final DBStorage dbStorage = new DBStorage("jdbc:h2:mem:test", true);
+        final DBStorage dbStorage = new DBStorage("jdbc:h2:mem:prod", true);
 
         final AccountDAO accountDAO = new AccountDaoJdbcImpl(dbStorage);
 

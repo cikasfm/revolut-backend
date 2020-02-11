@@ -38,6 +38,10 @@ public class AccountServiceEndpoint {
         Spark.get("/account/:accountNumber", (req, res) -> findAccountByNumber(req, res));
     }
 
+    /**
+     * Find all accounts endpoint with paging parameter
+     * @return all accounts array wrapped in a {@link StandardResponse} data and serialized as JSON string.
+     */
     protected String findAllAccounts(Request req, Response res) {
         res.type(APPLICATION_JSON);
         try {
@@ -96,8 +100,8 @@ public class AccountServiceEndpoint {
      * @param data the object to return in the "data" attribute of the JSON
      * @return a serialized {@link StandardResponse} to a JSON string
      */
-    private String respondOK(Serializable data) {
-        return gson.toJson(new StandardResponse(200, "OK", data));
+    private <T extends Serializable> String respondOK(T data) {
+        return gson.toJson(new StandardResponse<>(200, "OK", data));
     }
 
     /**
@@ -130,7 +134,7 @@ public class AccountServiceEndpoint {
             this.data = data;
         }
 
-        StandardResponse(int status, String message) {
+        public StandardResponse(int status, String message) {
             this(status, message, null);
         }
 
