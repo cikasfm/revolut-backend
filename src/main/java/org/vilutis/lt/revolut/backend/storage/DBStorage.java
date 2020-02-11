@@ -9,13 +9,13 @@ import org.apache.commons.dbcp2.PoolingDataSource;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vilutis.lt.revolut.backend.storage.schema.SchemaHelper;
 
 import javax.sql.DataSource;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.sql.Statement;
 
 public class DBStorage {
 
@@ -29,26 +29,8 @@ public class DBStorage {
 
     public DBStorage(String connectionString, boolean setupSchema) {
         this.dataSource = setupDataSource(connectionString);
-        if (setupSchema) setupSchema();
-    }
-
-    private void setupSchema() {
-        try( Connection connection = this.dataSource.getConnection() ) {
-            logger.info("START: setupSchema - creating tables");
-            try ( Statement statement = connection.createStatement() ) {
-                statement.execute(
-                        "create table account ( "
-                                + " accountNumber BIGINT PRIMARY KEY, "
-                                + " accountName VARCHAR(50), "
-                                + " balance DECIMAL(20, 2) "
-                                + " )"
-                );
-            }
-            logger.info("END: setupSchema - tables created");
-        } catch (SQLException e) {
-            RuntimeException re = ExceptionHelper.convertException(e);
-            logger.error(re.getMessage(), re);
-            throw re;
+        if (setupSchema) {
+            SchemaHelper.setupSchema(dataSource);
         }
     }
 

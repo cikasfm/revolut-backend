@@ -1,13 +1,13 @@
 package org.vilutis.lt.revolut.backend;
 
-import org.vilutis.lt.revolut.backend.api.AccountServiceEndoint;
+import org.vilutis.lt.revolut.backend.api.AccountServiceEndpoint;
 import org.vilutis.lt.revolut.backend.dao.AccountDAO;
 import org.vilutis.lt.revolut.backend.dao.impl.AccountDaoJdbcImpl;
 import org.vilutis.lt.revolut.backend.domain.Account;
 import org.vilutis.lt.revolut.backend.storage.DBStorage;
 
 /**
- * REST API for {@link Account} management
+ * Main application entry class for Account REST API
  */
 public class Application {
 
@@ -30,7 +30,7 @@ public class Application {
 
         final AccountDAO accountDAO = new AccountDaoJdbcImpl(dbStorage);
 
-        new AccountServiceEndoint(accountDAO);
+        new AccountServiceEndpoint(accountDAO);
 
     }
 
