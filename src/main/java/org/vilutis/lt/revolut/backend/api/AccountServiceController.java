@@ -7,7 +7,7 @@ import org.vilutis.lt.revolut.backend.dao.AccountDao;
 import org.vilutis.lt.revolut.backend.domain.Account;
 import spark.Request;
 import spark.Response;
-import spark.Spark;
+import spark.Route;
 import spark.utils.Assert;
 
 import javax.servlet.http.HttpServletResponse;
@@ -16,7 +16,7 @@ import java.io.Serializable;
 /**
  * REST API for {@link Account} management
  */
-public class AccountServiceEndpoint {
+public class AccountServiceController {
 
     public static final String APPLICATION_JSON = "application/json";
 
@@ -26,16 +26,15 @@ public class AccountServiceEndpoint {
 
     private final Gson gson = new Gson();
 
+    public final Route findAll = (req, res) -> findAllAccounts(req, res);
+    public final Route findAccountByNumber = (req, res) -> findAccountByNumber(req, res);
+
     /**
      * Initializes Account REST API Endpoint and exposes available API routes
      * @param accountDAO required for Data interactions
      */
-    public AccountServiceEndpoint(AccountDao accountDAO) {
+    public AccountServiceController(AccountDao accountDAO) {
         this.accountDAO = accountDAO;
-
-        // for testing purposes only!
-        Spark.get("/account/all", (req, res) -> findAllAccounts(req, res));
-        Spark.get("/account/:accountNumber", (req, res) -> findAccountByNumber(req, res));
     }
 
     /**

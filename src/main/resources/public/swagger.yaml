@@ -1,0 +1,109 @@
+swagger: "2.0"
+info:
+  description: "Ultra-simple bank account application. Supports create account, view account &amp; transfer balance methods"
+  version: "1.0.0"
+  title: "Thin Account"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "cikasfm@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+basePath: "/api"
+tags:
+  - name: "account"
+    description: "Everything about your Accounts"
+schemes:
+  - "http"
+paths:
+  /account/all:
+    get:
+      tags:
+        - "account"
+      summary: "Find all accounts in the datastore"
+      description: "Returns all account"
+      operationId: "findAll"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "pageNum"
+          in: "query"
+          description: "Page Number. Default is 0"
+          required: false
+          type: "integer"
+          format: "int64"
+          default: 0
+        - name: "pageSize"
+          in: "query"
+          description: "Page Size. Default is 20"
+          required: false
+          type: "integer"
+          format: "int64"
+          default: 20
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties:
+              status:
+                type: "integer"
+                format: "int32"
+              message:
+                type: "string"
+              data:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Account"
+        400:
+          description: "Invalid accountNumber supplied"
+        404:
+          description: "Account not found"
+  /account/{accountNumber}:
+    get:
+      tags:
+        - "account"
+      summary: "Find Account by accountNumber"
+      description: "Returns a single account"
+      operationId: "findByAccountNumber"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "accountNumber"
+          in: "path"
+          description: "accountNumber of account to return"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties:
+              status:
+                type: "integer"
+                format: "int32"
+              message:
+                type: "string"
+              data:
+                $ref: "#/definitions/Account"
+        400:
+          description: "Invalid accountNumber supplied"
+        404:
+          description: "Account not found"
+definitions:
+  Account:
+    type: "object"
+    properties:
+      accountNumber:
+        type: "integer"
+        format: "int64"
+        description: "Account Number"
+      accountName:
+        type: "integer"
+        description: "Account Name"
+      balance:
+        type: "number"
+        default: false
+        description: "Account Balance in local currency"

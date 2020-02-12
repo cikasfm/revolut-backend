@@ -8,6 +8,11 @@
     <artifactId>revolut-backend</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <description>
+        Ultra-simple bank account application.
+        Supports create account, view account &amp; transfer balance methods
+    </description>
+
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
