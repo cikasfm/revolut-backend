@@ -2,7 +2,7 @@ swagger: "2.0"
 info:
   description: "Ultra-simple bank account application. Supports create account, view account &amp; transfer balance methods"
   version: "1.0.0"
-  title: "Thin Account"
+  title: "Thin Accounting"
   termsOfService: "http://swagger.io/terms/"
   contact:
     email: "cikasfm@gmail.com"
