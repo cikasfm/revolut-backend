@@ -14,6 +14,7 @@ tags:
   - name: "account"
     description: "Everything about your Accounts"
 schemes:
+  - "https"
   - "http"
 paths:
   /account/all:
