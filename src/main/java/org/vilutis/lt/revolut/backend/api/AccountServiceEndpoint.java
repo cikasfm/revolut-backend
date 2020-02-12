@@ -3,7 +3,7 @@ package org.vilutis.lt.revolut.backend.api;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vilutis.lt.revolut.backend.dao.AccountDAO;
+import org.vilutis.lt.revolut.backend.dao.AccountDao;
 import org.vilutis.lt.revolut.backend.domain.Account;
 import spark.Request;
 import spark.Response;
@@ -22,7 +22,7 @@ public class AccountServiceEndpoint {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final AccountDAO accountDAO;
+    private final AccountDao accountDAO;
 
     private final Gson gson = new Gson();
 
@@ -30,7 +30,7 @@ public class AccountServiceEndpoint {
      * Initializes Account REST API Endpoint and exposes available API routes
      * @param accountDAO required for Data interactions
      */
-    public AccountServiceEndpoint(AccountDAO accountDAO) {
+    public AccountServiceEndpoint(AccountDao accountDAO) {
         this.accountDAO = accountDAO;
 
         // for testing purposes only!

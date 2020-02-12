@@ -1,9 +1,8 @@
 package org.vilutis.lt.revolut.backend;
 
 import org.vilutis.lt.revolut.backend.api.AccountServiceEndpoint;
-import org.vilutis.lt.revolut.backend.dao.AccountDAO;
+import org.vilutis.lt.revolut.backend.dao.AccountDao;
 import org.vilutis.lt.revolut.backend.dao.impl.AccountDaoJdbcImpl;
-import org.vilutis.lt.revolut.backend.domain.Account;
 import org.vilutis.lt.revolut.backend.storage.DBStorage;
 
 /**
@@ -28,7 +27,7 @@ public class Application {
 
         final DBStorage dbStorage = new DBStorage("jdbc:h2:mem:prod", true);
 
-        final AccountDAO accountDAO = new AccountDaoJdbcImpl(dbStorage);
+        final AccountDao accountDAO = new AccountDaoJdbcImpl(dbStorage);
 
         new AccountServiceEndpoint(accountDAO);
 

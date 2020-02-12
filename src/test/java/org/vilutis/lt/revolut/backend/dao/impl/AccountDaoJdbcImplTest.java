@@ -2,10 +2,11 @@ package org.vilutis.lt.revolut.backend.dao.impl;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.vilutis.lt.revolut.backend.dao.AccountDAO;
+import org.vilutis.lt.revolut.backend.dao.AccountDao;
 import org.vilutis.lt.revolut.backend.domain.Account;
 import org.vilutis.lt.revolut.backend.storage.DBStorage;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -15,7 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AccountDaoJdbcImplTest {
 
-    private static AccountDAO accountDAO;
+    private static AccountDao accountDAO;
 
     @BeforeClass
     public static void setUp() {
@@ -85,5 +86,22 @@ public class AccountDaoJdbcImplTest {
         final ArrayList<Account> result = accountDAO.findAll(0, 1);
 
         assertThat("there must be a single result", result.size(), equalTo(1));
+    }
+
+    @Test
+    public void transferBalance() {
+        Account fromAcct = accountDAO.create("from");
+        fromAcct.setBalance(100D);
+        fromAcct = accountDAO.update(fromAcct);
+
+        Account toAcct = accountDAO.create("to");
+
+        accountDAO.transferBalance(fromAcct.getAccountNumber(), toAcct.getAccountNumber(), BigDecimal.TEN.setScale(2));
+
+        fromAcct = accountDAO.findByAccountNumber(fromAcct.getAccountNumber());
+        toAcct = accountDAO.findByAccountNumber(toAcct.getAccountNumber());
+
+        assertThat("FROM balance must be updated in DB", fromAcct.getBalance(), equalTo(BigDecimal.valueOf(9000L, 2)));
+        assertThat("TO balance must be updated in DB", toAcct.getBalance(), equalTo(BigDecimal.valueOf(1000L, 2)));
     }
 }

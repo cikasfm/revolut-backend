@@ -11,7 +11,7 @@ import java.math.RoundingMode;
  */
 public class Account implements Serializable {
 
-    private static final int SCALE = 2;
+    public static final int SCALE = 2;
 
     private static final BigDecimal ZERO = BigDecimal.ZERO.setScale(SCALE, RoundingMode.HALF_UP);
 

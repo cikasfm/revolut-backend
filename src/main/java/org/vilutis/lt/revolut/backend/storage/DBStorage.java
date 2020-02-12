@@ -34,10 +34,6 @@ public class DBStorage {
         }
     }
 
-    public DataSource getDataSource() {
-        return dataSource;
-    }
-
     public <T extends Serializable> T runSQL(DBAction<T> action) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
             return action.doSQL(connection);
@@ -50,21 +46,26 @@ public class DBStorage {
 
     public <T extends Serializable> T runInTransaction(DBAction<T> action, boolean rollbackOnError) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
+            logger.debug("connection opened");
             connection.setAutoCommit(false);
             final Savepoint savepoint = connection.setSavepoint();
             try {
                 final T result = action.doSQL(connection);
                 connection.commit();
+                logger.debug("transaction commit");
                 return result;
             } catch ( Throwable t ) {
                 if ( rollbackOnError ) {
                     connection.rollback( savepoint );
+                    logger.debug("transaction rollback");
                 }
                 // to be handled by the consumer
                 throw t;
             } finally {
                 connection.setAutoCommit(true);
             }
+        } finally {
+            logger.debug("connection closed");
         }
     }
 

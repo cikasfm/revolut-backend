@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.vilutis.lt.revolut.backend.dao.AccountDAO;
+import org.vilutis.lt.revolut.backend.dao.AccountDao;
 import org.vilutis.lt.revolut.backend.dao.impl.AccountDaoJdbcImpl;
 import org.vilutis.lt.revolut.backend.domain.Account;
 import org.vilutis.lt.revolut.backend.storage.DBStorage;
@@ -58,7 +58,7 @@ public class AccountServiceEndpointTest {
 
         DBStorage dbStorage = new DBStorage("jdbc:h2:mem:test", true);
 
-        AccountDAO accountDAO = new AccountDaoJdbcImpl(dbStorage);
+        AccountDao accountDAO = new AccountDaoJdbcImpl(dbStorage);
 
         endpoint = new AccountServiceEndpoint(accountDAO);
 
