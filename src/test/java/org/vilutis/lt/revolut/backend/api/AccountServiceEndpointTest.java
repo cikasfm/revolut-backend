@@ -8,12 +8,11 @@ import org.vilutis.lt.revolut.backend.dao.AccountDao;
 import org.vilutis.lt.revolut.backend.dao.impl.AccountDaoJdbcImpl;
 import org.vilutis.lt.revolut.backend.domain.Account;
 import org.vilutis.lt.revolut.backend.storage.DBStorage;
+import org.vilutis.lt.revolut.backend.test.TestUtil;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
 
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.ArrayList;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -30,35 +29,14 @@ public class AccountServiceEndpointTest {
     private static AccountServiceEndpoint endpoint;
     private static Account[] testAccounts;
 
+    private final Gson gson = new Gson();
+
     @BeforeClass
     public static void init() {
-        //
-        // First we load the underlying JDBC driver.
-        // You need this if you don't use the jdbc.drivers
-        // system property.
-        //
-        System.out.println("Loading underlying JDBC driver.");
-        try {
-            Class.forName("org.h2.Driver");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Done.");
 
-        int localPort;
+        Spark.port(TestUtil.findRandomOpenPort());
 
-        // find a random available port
-        try (ServerSocket s = new ServerSocket(0)) {
-            localPort = s.getLocalPort();
-        } catch (IOException e) {
-            throw new Error(e.getMessage(), e);
-        }
-
-        Spark.port(localPort);
-
-        DBStorage dbStorage = new DBStorage("jdbc:h2:mem:test", true);
-
-        AccountDao accountDAO = new AccountDaoJdbcImpl(dbStorage);
+        AccountDao accountDAO = new AccountDaoJdbcImpl(new DBStorage("/test.db.properties"));
 
         endpoint = new AccountServiceEndpoint(accountDAO);
 
@@ -68,8 +46,6 @@ public class AccountServiceEndpointTest {
                 accountDAO.create("third")
         };
     }
-
-    private final Gson gson = new Gson();
 
     @Test
     public void findAllAccounts_happyPath() {

@@ -20,23 +20,7 @@ public class AccountDaoJdbcImplTest {
 
     @BeforeClass
     public static void setUp() {
-
-        //
-        // First we load the underlying JDBC driver.
-        // You need this if you don't use the jdbc.drivers
-        // system property.
-        //
-        System.out.println("Loading underlying JDBC driver.");
-        try {
-            Class.forName("org.h2.Driver");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Done.");
-
-        DBStorage dbStorage = new DBStorage("jdbc:h2:mem:test", true);
-
-        accountDAO = new AccountDaoJdbcImpl(dbStorage);
+        accountDAO = new AccountDaoJdbcImpl(new DBStorage("/test.db.properties"));
     }
 
     @Test
