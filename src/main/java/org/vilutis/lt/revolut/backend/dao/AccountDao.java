@@ -5,6 +5,9 @@ import org.vilutis.lt.revolut.backend.domain.Account;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
+/**
+ * {@link Account} operations resulting in read/write/update/delete data in the data store
+ */
 public interface AccountDao {
 
     /**

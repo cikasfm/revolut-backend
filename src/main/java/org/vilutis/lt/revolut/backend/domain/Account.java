@@ -93,7 +93,7 @@ public class Account implements Serializable {
      */
     public void setBalance(BigDecimal balance) {
         Assert.notNull(balance, "Balance cannot be null!");
-        this.balance = balance.setScale(SCALE, RoundingMode.HALF_UP);
+        this.balance = normalizeAmountScale(balance);
     }
 
     /**
@@ -104,7 +104,17 @@ public class Account implements Serializable {
      */
     public void setBalance(Double balance) {
         Assert.notNull(balance, "Balance cannot be null!");
-        this.balance = new BigDecimal(balance).setScale(SCALE, RoundingMode.HALF_UP);
+        this.balance = normalizeAmountScale(BigDecimal.valueOf(balance));
+    }
+
+    /**
+     * Only "money" values can be used, so must be rounded to the smallest possible money value ( that is, cents )
+     *
+     * @param amount to normalize
+     * @return amount rounded to {@link Account#SCALE} number of decimals
+     */
+    public static BigDecimal normalizeAmountScale(BigDecimal amount) {
+        return amount.setScale(SCALE, RoundingMode.HALF_UP);
     }
 
     /**

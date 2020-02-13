@@ -14,6 +14,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+/**
+ * {@inheritDoc}
+ *
+ * Implementation using a JDBC Datastore
+ */
 public class AccountDaoJdbcImpl implements AccountDao {
 
     private final DBStorage dbStorage;
@@ -186,6 +191,7 @@ public class AccountDaoJdbcImpl implements AccountDao {
         Assert.isTrue(amount.scale() <= Account.SCALE,
                 "amount scale must NOT greater than " + Account.SCALE);
         Assert.isTrue(amount.compareTo(BigDecimal.ZERO) > 0, "amount must be positive");
+
         try {
             dbStorage.runInTransaction( connection -> {
                 // 1. find "from" account ( if exists & check if balance is enough )
@@ -194,17 +200,19 @@ public class AccountDaoJdbcImpl implements AccountDao {
                 // 4. update balance in "from" account
                 // 5. TODO : write audit log
 
+                final BigDecimal normalizedAmount = Account.normalizeAmountScale(amount);
+
                 final Account fromAcct = findByAccountNumber(fromAcctNum);
                 Assert.notNull(fromAcct, "'from' Account not found!");
-                Assert.isTrue(fromAcct.getBalance().compareTo(amount) >= 0,
+                Assert.isTrue(fromAcct.getBalance().compareTo(normalizedAmount) >= 0,
                         "From account balance is not enough for transfer");
 
                 final Account toAcct = findByAccountNumber(toAcctNum);
                 Assert.notNull(toAcct, "'to' Account not found");
 
-                withdrawAmount(fromAcctNum, amount, connection);
+                withdrawAmount(fromAcctNum, normalizedAmount, connection);
 
-                depositAmount(toAcctNum, amount, connection);
+                depositAmount(toAcctNum, normalizedAmount, connection);
 
                 return true;
             });
@@ -214,7 +222,7 @@ public class AccountDaoJdbcImpl implements AccountDao {
     }
 
     @Override
-    public Account deposit(Long accountNumber, BigDecimal amount) {
+    public Account deposit(final Long accountNumber, final BigDecimal amount) {
         Assert.notNull(accountNumber, "accountNumber must be set");
         Assert.notNull(amount, "amount must be set");
         Assert.isTrue(amount.scale() <= Account.SCALE,
@@ -225,9 +233,11 @@ public class AccountDaoJdbcImpl implements AccountDao {
                 final Account account = findAccountByNumber(accountNumber, connection);
                 Assert.notNull(account, "'from' Account not found!");
 
-                depositAmount(accountNumber, amount, connection);
+                BigDecimal normalizedAmount = Account.normalizeAmountScale(amount);
 
-                account.setBalance(account.getBalance().add(amount));
+                depositAmount(accountNumber, normalizedAmount, connection);
+
+                account.setBalance(account.getBalance().add(normalizedAmount));
 
                 return account;
             });
@@ -265,12 +275,14 @@ public class AccountDaoJdbcImpl implements AccountDao {
                 final Account account = findAccountByNumber(accountNumber, connection);
                 Assert.notNull(account, "'from' Account not found!");
 
-                Assert.isTrue(account.getBalance().compareTo(amount) >= 0,
+                BigDecimal normalizedAmount = Account.normalizeAmountScale(amount);
+
+                Assert.isTrue(account.getBalance().compareTo(normalizedAmount) >= 0,
                         "account balance is not enough for withdrawal");
 
-                withdrawAmount(accountNumber, amount, connection);
+                withdrawAmount(accountNumber, normalizedAmount, connection);
 
-                account.setBalance(account.getBalance().subtract(amount));
+                account.setBalance(account.getBalance().subtract(normalizedAmount));
 
                 return account;
             });
@@ -279,7 +291,15 @@ public class AccountDaoJdbcImpl implements AccountDao {
         }
     }
 
-    public void withdrawAmount(Long accountNumber, BigDecimal amount, Connection connection) throws SQLException {
+    /**
+     * Performs the actual withdrawal - updates the balance in the database
+     *
+     * @param accountNumber
+     * @param amount
+     * @param connection
+     * @throws SQLException
+     */
+    private void withdrawAmount(Long accountNumber, BigDecimal amount, Connection connection) throws SQLException {
         try ( PreparedStatement updateStatement = connection.prepareStatement(
                 " UPDATE account "
                         + " SET balance = balance - ? "
