@@ -88,4 +88,45 @@ public class AccountDaoJdbcImplTest {
         assertThat("FROM balance must be updated in DB", fromAcct.getBalance(), equalTo(BigDecimal.valueOf(9000L, 2)));
         assertThat("TO balance must be updated in DB", toAcct.getBalance(), equalTo(BigDecimal.valueOf(1000L, 2)));
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void transferBalance_fakeAcct() {
+        accountDAO.transferBalance(98765432L, 98765433L, BigDecimal.TEN.setScale(2));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void transferBalance_zeroAmount() {
+        Account fromAcct = accountDAO.create("from_zeroAmount");
+        Account toAcct = accountDAO.create("to_zeroAmount");
+
+        accountDAO.transferBalance(fromAcct.getAccountNumber(), toAcct.getAccountNumber(), BigDecimal.ZERO.setScale(2));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void transferBalance_negativeAmount() {
+        Account fromAcct = accountDAO.create("from_negativeAmount");
+        Account toAcct = accountDAO.create("to_negativeAmount");
+
+        accountDAO.transferBalance(fromAcct.getAccountNumber(), toAcct.getAccountNumber(),
+                BigDecimal.TEN.negate().setScale(2));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void transferBalance_notEnoughFunds() {
+        Account fromAcct = accountDAO.create("from2");
+        Account toAcct = accountDAO.create("to2");
+
+        accountDAO.transferBalance(fromAcct.getAccountNumber(), toAcct.getAccountNumber(), BigDecimal.TEN.setScale(2));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void transferBalance_amountScaleInvalid() {
+        Account fromAcct = accountDAO.create("from3");
+        fromAcct.setBalance(100D);
+        fromAcct = accountDAO.update(fromAcct);
+
+        Account toAcct = accountDAO.create("to3");
+
+        accountDAO.transferBalance(fromAcct.getAccountNumber(), toAcct.getAccountNumber(), BigDecimal.TEN.setScale(3));
+    }
 }

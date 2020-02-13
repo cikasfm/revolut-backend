@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 import static org.vilutis.lt.revolut.backend.api.StandardResponse.*;
 
 /**
- * REST API for {@link Account} management
+ * REST API Controller for {@link Account} management
  */
 public class BalanceController {
 
@@ -46,10 +46,12 @@ public class BalanceController {
 
     /**
      * Transfers a balance from one account to another.
+     *
      * Expects {@link Request} to contain body with a JSON compatible with {@link TransferDTO}
-     * @param req
-     * @param res
-     * @return
+     *
+     * @param req the {@link Request} object
+     * @param res the {@link Response} object
+     * @return a {@link StandardResponse} in case of successful operation with data, or with error message otherwise
      */
     protected StandardResponse transferBalance(Request req, Response res) {
         try {
@@ -73,6 +75,15 @@ public class BalanceController {
         }
     }
 
+    /**
+     * Deposits an amount to an {@link Account}'s balance
+     *
+     * Expects {@link Request} to contain body with a JSON compatible with {@link TransferDTO}
+     *
+     * @param req the {@link Request} object
+     * @param res the {@link Response} object
+     * @return a {@link StandardResponse} in case of successful operation with data, or with error message otherwise
+     */
     protected StandardResponse deposit(Request req, Response res) {
         try {
             res.status(HttpServletResponse.SC_OK);
@@ -93,6 +104,15 @@ public class BalanceController {
         }
     }
 
+    /**
+     * Withdraws an amount from an {@link Account}'s balance
+     *
+     * Expects {@link Request} to contain body with a JSON compatible with {@link TransferDTO}
+     *
+     * @param req the {@link Request} object
+     * @param res the {@link Response} object
+     * @return a {@link StandardResponse} in case of successful operation with data, or with error message otherwise
+     */
     protected StandardResponse withdraw(Request req, Response res) {
         try {
             res.status(HttpServletResponse.SC_OK);
