@@ -181,8 +181,10 @@ public class AccountDaoJdbcImpl implements AccountDao {
     public void transferBalance(Long fromAcctNum, Long toAcctNum, BigDecimal amount) {
         Assert.notNull(fromAcctNum, "fromAcctNum must be set");
         Assert.notNull(toAcctNum, "toAcctNum must be set");
-        Assert.isTrue(amount.scale() >= Account.SCALE,
-                "amount scale must be equal to or greater than " + Account.SCALE);
+        Assert.notNull(amount, "amount must be set");
+        Assert.isTrue(!fromAcctNum.equals(toAcctNum), "FROM and TO accounts cannot be the same");
+        Assert.isTrue(amount.scale() <= Account.SCALE,
+                "amount scale must NOT greater than " + Account.SCALE);
         Assert.isTrue(amount.compareTo(BigDecimal.ZERO) > 0, "amount must be positive");
         try {
             dbStorage.runInTransaction( connection -> {
@@ -194,35 +196,15 @@ public class AccountDaoJdbcImpl implements AccountDao {
 
                 final Account fromAcct = findByAccountNumber(fromAcctNum);
                 Assert.notNull(fromAcct, "'from' Account not found!");
-                Assert.isTrue(fromAcct.getBalance().compareTo(amount)>=0, "From account balance is not enough for "
-                        + "transfer");
+                Assert.isTrue(fromAcct.getBalance().compareTo(amount) >= 0,
+                        "From account balance is not enough for transfer");
 
                 final Account toAcct = findByAccountNumber(toAcctNum);
                 Assert.notNull(toAcct, "'to' Account not found");
 
-                try ( PreparedStatement updateFrom = connection.prepareStatement(
-                        " UPDATE account "
-                                + " SET balance = balance - ? "
-                                + " WHERE accountNumber = ? "
-                ) ) {
-                    updateFrom.setBigDecimal(1, amount);
-                    updateFrom.setLong(2, fromAcctNum);
-                    if ( updateFrom.executeUpdate() != 1 ) {
-                        throw new SQLException("Update 'from' account failed", updateFrom.getWarnings());
-                    }
-                }
+                withdrawAmount(fromAcctNum, amount, connection);
 
-                try ( PreparedStatement updateTo = connection.prepareStatement(
-                        " UPDATE account "
-                                + " SET balance = balance + ? "
-                                + " WHERE accountNumber = ? "
-                ) ) {
-                    updateTo.setBigDecimal(1, amount);
-                    updateTo.setLong(2, toAcctNum);
-                    if ( updateTo.executeUpdate() != 1 ) {
-                        throw new SQLException("Update 'to' account failed", updateTo.getWarnings());
-                    }
-                }
+                depositAmount(toAcctNum, amount, connection);
 
                 return true;
             });
@@ -230,4 +212,85 @@ public class AccountDaoJdbcImpl implements AccountDao {
             throw ExceptionHelper.convertException(ex);
         }
     }
+
+    @Override
+    public Account deposit(Long accountNumber, BigDecimal amount) {
+        Assert.notNull(accountNumber, "accountNumber must be set");
+        Assert.notNull(amount, "amount must be set");
+        Assert.isTrue(amount.scale() <= Account.SCALE,
+                "amount scale must NOT greater than " + Account.SCALE);
+        Assert.isTrue(amount.compareTo(BigDecimal.ZERO) > 0, "amount must be positive");
+        try {
+            return dbStorage.runInTransaction( connection -> {
+                final Account account = findAccountByNumber(accountNumber, connection);
+                Assert.notNull(account, "'from' Account not found!");
+
+                depositAmount(accountNumber, amount, connection);
+
+                account.setBalance(account.getBalance().add(amount));
+
+                return account;
+            });
+        } catch (SQLException ex){
+            throw ExceptionHelper.convertException(ex);
+        }
+    }
+
+    private void depositAmount(Long accountNumber, BigDecimal amount, Connection connection) throws SQLException {
+        try ( PreparedStatement updateStatement = connection.prepareStatement(
+                " UPDATE account "
+                        + " SET balance = balance + ? "
+                        + " WHERE accountNumber = ? "
+        ) ) {
+            updateStatement.setBigDecimal(1, amount);
+            updateStatement.setLong(2, accountNumber);
+            if ( updateStatement.executeUpdate() != 1 ) {
+                throw new SQLException("Update 'to' account failed", updateStatement.getWarnings());
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Account withdraw(Long accountNumber, BigDecimal amount) {
+        Assert.notNull(accountNumber, "accountNumber must be set");
+        Assert.notNull(amount, "amount must be set");
+        Assert.isTrue(amount.scale() <= Account.SCALE,
+                "amount scale must NOT greater than " + Account.SCALE);
+        Assert.isTrue(amount.compareTo(BigDecimal.ZERO) > 0, "amount must be positive");
+        try {
+            return dbStorage.runInTransaction( connection -> {
+                final Account account = findAccountByNumber(accountNumber, connection);
+                Assert.notNull(account, "'from' Account not found!");
+
+                Assert.isTrue(account.getBalance().compareTo(amount) >= 0,
+                        "account balance is not enough for withdrawal");
+
+                withdrawAmount(accountNumber, amount, connection);
+
+                account.setBalance(account.getBalance().subtract(amount));
+
+                return account;
+            });
+        } catch (SQLException ex){
+            throw ExceptionHelper.convertException(ex);
+        }
+    }
+
+    public void withdrawAmount(Long accountNumber, BigDecimal amount, Connection connection) throws SQLException {
+        try ( PreparedStatement updateStatement = connection.prepareStatement(
+                " UPDATE account "
+                        + " SET balance = balance - ? "
+                        + " WHERE accountNumber = ? "
+        ) ) {
+            updateStatement.setBigDecimal(1, amount);
+            updateStatement.setLong(2, accountNumber);
+            if ( updateStatement.executeUpdate() != 1 ) {
+                throw new SQLException("Update 'from' account failed", updateStatement.getWarnings());
+            }
+        }
+    }
+
 }

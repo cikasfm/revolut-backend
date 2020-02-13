@@ -48,4 +48,22 @@ public interface AccountDao {
      * @param amount the amount to transfer. Must be a positive value
      */
     void transferBalance(Long fromAcctNum, Long toAcctNum, BigDecimal amount);
+
+    /**
+     * Deposits a specified amount of money to the account's balance
+     *
+     * @param accountNumber the account number to deposit to
+     * @param amount the amount to be deposited
+     * @return the updated {@link Account}
+     */
+    Account deposit( Long accountNumber, BigDecimal amount );
+
+    /**
+     * Withdraws a specified amount of money from the account's balance
+     *
+     * @param accountNumber the account number to withdraw to
+     * @param amount the amount to be withdrawn
+     * @return the updated {@link Account}
+     */
+    Account withdraw(Long accountNumber, BigDecimal amount);
 }
