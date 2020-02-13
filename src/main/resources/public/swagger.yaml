@@ -2,7 +2,7 @@ swagger: "2.0"
 info:
   description: "Ultra-simple bank account application. Supports create account, view account &amp; transfer balance methods"
   version: "1.0.0"
-  title: "Thin Accounting"
+  title: "Thin Bank"
   termsOfService: "http://swagger.io/terms/"
   contact:
     email: "cikasfm@gmail.com"
@@ -35,18 +35,15 @@ paths:
           description: "Account Created"
           schema:
             type: "object"
-            properties:
-              status:
-                type: "integer"
-                format: "int32"
-              message:
-                type: "string"
-              data:
-                type: "array"
-                items:
-                  $ref: "#/definitions/Account"
+            allOf:
+              - $ref: "#/definitions/StandardResponse"
+              - properties:
+                  data:
+                    $ref: "#/definitions/Account"
         400:
           description: "Account Name null or empty"
+          schema:
+            $ref: "#/definitions/StandardResponse"
   /account/all:
     get:
       tags:
@@ -76,20 +73,13 @@ paths:
           description: "successful operation"
           schema:
             type: "object"
-            properties:
-              status:
-                type: "integer"
-                format: "int32"
-              message:
-                type: "string"
-              data:
-                type: "array"
-                items:
-                  $ref: "#/definitions/Account"
-        400:
-          description: "Invalid accountNumber supplied"
-        404:
-          description: "Account not found"
+            allOf:
+              - $ref: "#/definitions/StandardResponse"
+              - properties:
+                  data:
+                    type: "array"
+                    items:
+                      $ref: "#/definitions/Account"
   /account/{accountNumber}:
     get:
       tags:
@@ -111,18 +101,19 @@ paths:
           description: "successful operation"
           schema:
             type: "object"
-            properties:
-              status:
-                type: "integer"
-                format: "int32"
-              message:
-                type: "string"
-              data:
-                $ref: "#/definitions/Account"
+            allOf:
+              - $ref: "#/definitions/StandardResponse"
+              - properties:
+                  data:
+                    $ref: "#/definitions/Account"
         400:
           description: "Invalid accountNumber supplied"
+          schema:
+            $ref: "#/definitions/StandardResponse"
         404:
           description: "Account not found"
+          schema:
+            $ref: "#/definitions/StandardResponse"
   /balance/transfer:
     post:
       tags:
@@ -137,10 +128,89 @@ paths:
             $ref: "#/definitions/TransferDTO"
       responses:
         200:
-          description: "Account Created"
+          description: "Balance transferred"
+          schema:
+            $ref: "#/definitions/StandardResponse"
         400:
-          description: "Account Name null or empty"
+          description: |
+            One of:
+             - Account FROM or TO number is invalid or account does not exist
+             - Amount is invalid - either negative, or has more than 2 decimal digits
+             - Account balance is not sufficient
+          schema:
+            $ref: "#/definitions/StandardResponse"
+  /balance/deposit:
+    post:
+      tags:
+        - "balance"
+      summary: "Deposit money"
+      description: "Deposits a specified amount to an account"
+      operationId: "deposit"
+      parameters:
+        - in: "body"
+          name: "TransferDTO"
+          schema:
+            properties:
+              toAcct:
+                type: "integer"
+                format: "int64"
+                description: "Account Number to deposit TO"
+              amount:
+                type: "number"
+                description: "Deposit amount in local currency"
+      responses:
+        200:
+          description: "Deposit completed"
+          schema:
+            $ref: "#/definitions/StandardResponse"
+        400:
+          description: |
+            One of:
+             - Account TO number is invalid or account does not exist
+             - Amount is invalid - either negative, or has more than 2 decimal digits
+          schema:
+            $ref: "#/definitions/StandardResponse"
+  /balance/withdraw:
+    post:
+      tags:
+        - "balance"
+      summary: "Withdraw money"
+      description: "Withdraws a specified amount from an account"
+      operationId: "withdraw"
+      parameters:
+        - in: "body"
+          name: "TransferDTO"
+          schema:
+            properties:
+              fromAcct:
+                type: "integer"
+                format: "int64"
+                description: "Account Number to withdraw FROM"
+              amount:
+                type: "number"
+                description: "Withdrawal amount in local currency"
+      responses:
+        200:
+          description: "Withdrawal completed"
+          schema:
+            $ref: "#/definitions/StandardResponse"
+        400:
+          description: |
+            One of:
+             - Account TO number is invalid or account does not exist
+             - Amount is invalid - either negative, or has more than 2 decimal digits
+             - Account balance is not sufficient
+          schema:
+            $ref: "#/definitions/StandardResponse"
 definitions:
+  StandardResponse:
+    type: "object"
+    properties:
+      status:
+        type: "integer"
+        format: "int32"
+      message:
+        type: "string"
   Account:
     type: "object"
     properties:

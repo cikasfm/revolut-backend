@@ -1,6 +1,7 @@
 package org.vilutis.lt.revolut.backend.api;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vilutis.lt.revolut.backend.dao.AccountDao;
@@ -48,12 +49,7 @@ public class BalanceController {
             accountDAO.transferBalance(transferDTO.fromAcct, transferDTO.toAcct, transferDTO.balance);
 
             return respondOK(null);
-        } catch (NumberFormatException e) {
-            logger.debug(e.getMessage(), e);
-
-            res.status(HttpServletResponse.SC_BAD_REQUEST);
-            return respond(400, "Invalid number format for param 'pageNum' or 'pageSize");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | JsonSyntaxException e) {
             logger.debug(e.getMessage(), e);
 
             res.status(HttpServletResponse.SC_BAD_REQUEST);

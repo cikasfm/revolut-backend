@@ -17,7 +17,7 @@
         <java.version>1.8</java.version>
         <sparkjava.version>2.9.1</sparkjava.version>
         <slf4j.version>1.7.30</slf4j.version>
-        <heroku.app.name>thin-accounting</heroku.app.name>
+        <heroku.app.name>thin-bank</heroku.app.name>
     </properties>
 
     <dependencies>
@@ -104,19 +104,6 @@
                             <mainClass>org.vilutis.lt.revolut.backend.Application</mainClass>
                         </manifest>
                     </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.heroku.sdk</groupId>
-                <artifactId>heroku-maven-plugin</artifactId>
-                <version>2.0.16</version>
-                <configuration>
-                    <jdkVersion>${java.version}</jdkVersion>
-                    <appName>${heroku.app.name}</appName>
-                    <processTypes>
-                        <!-- Tell Heroku how to launch your application -->
-                        <web>java -jar ./target/revolut-backend-1.0-SNAPSHOT-jar-with-dependencies.jar</web>
-                    </processTypes>
                 </configuration>
             </plugin>
         </plugins>
