@@ -1,11 +1,11 @@
 package org.vilutis.lt.revolut.backend;
 
-import org.vilutis.lt.revolut.backend.api.AccountServiceController;
+import org.vilutis.lt.revolut.backend.api.AccountController;
+import org.vilutis.lt.revolut.backend.api.BalanceController;
 import org.vilutis.lt.revolut.backend.dao.AccountDao;
 import org.vilutis.lt.revolut.backend.dao.impl.AccountDaoJdbcImpl;
 import org.vilutis.lt.revolut.backend.storage.DBStorage;
 import spark.Service;
-import spark.Spark;
 
 import static spark.Spark.*;
 
@@ -20,7 +20,8 @@ public class Application {
 
         final AccountDao accountDAO = new AccountDaoJdbcImpl(dbStorage);
 
-        final AccountServiceController accountService = new AccountServiceController(accountDAO);
+        final AccountController accountController = new AccountController(accountDAO);
+        final BalanceController balanceController = new BalanceController(accountDAO);
 
         ProcessBuilder process = new ProcessBuilder();
 
@@ -47,8 +48,12 @@ public class Application {
         path("/api", ()->{
             // account API
             path("/account", () -> {
-                get("/all", accountService.findAll);
-                get("/:accountNumber", accountService.findAccountByNumber);
+                put("", accountController.create);
+                get("/all", accountController.findAll);
+                get("/:accountNumber", accountController.findAccountByNumber);
+            });
+            path("/balance", () -> {
+                post("/transfer", balanceController.transfer);
             });
         });
 

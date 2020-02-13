@@ -17,6 +17,36 @@ schemes:
   - "https"
   - "http"
 paths:
+  /account:
+    put:
+      tags:
+        - "account"
+      summary: "Create a new Account"
+      description: "Saves a new Account object in DB, generates account number"
+      operationId: "create"
+      parameters:
+        - name: "accountName"
+          type: "string"
+          in: "query"
+          description: "Account Name"
+          required: true
+      responses:
+        200:
+          description: "Account Created"
+          schema:
+            type: "object"
+            properties:
+              status:
+                type: "integer"
+                format: "int32"
+              message:
+                type: "string"
+              data:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Account"
+        400:
+          description: "Account Name null or empty"
   /account/all:
     get:
       tags:
@@ -93,6 +123,23 @@ paths:
           description: "Invalid accountNumber supplied"
         404:
           description: "Account not found"
+  /balance/transfer:
+    post:
+      tags:
+        - "balance"
+      summary: "Transfer Balance"
+      description: "Transfers a specified balance from one account to another"
+      operationId: "transferBalance"
+      parameters:
+        - in: "body"
+          name: "TransferDTO"
+          schema:
+            $ref: "#/definitions/TransferDTO"
+      responses:
+        200:
+          description: "Account Created"
+        400:
+          description: "Account Name null or empty"
 definitions:
   Account:
     type: "object"
@@ -106,5 +153,18 @@ definitions:
         description: "Account Name"
       balance:
         type: "number"
-        default: false
         description: "Account Balance in local currency"
+  TransferDTO:
+    type: "object"
+    properties:
+      fromAcct:
+        type: "integer"
+        format: "int64"
+        description: "Account Number to transfer FROM"
+      toAcct:
+        type: "integer"
+        format: "int64"
+        description: "Account Number to transfer TO"
+      amount:
+        type: "number"
+        description: "Transfer amount in local currency"

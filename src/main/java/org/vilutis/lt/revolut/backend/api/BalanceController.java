@@ -12,11 +12,12 @@ import spark.utils.Assert;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * REST API for {@link Account} management
  */
-public class AccountServiceController {
+public class BalanceController {
 
     public static final String APPLICATION_JSON = "application/json";
 
@@ -26,65 +27,37 @@ public class AccountServiceController {
 
     private final Gson gson = new Gson();
 
-    public final Route findAll = (req, res) -> findAllAccounts(req, res);
-    public final Route findAccountByNumber = (req, res) -> findAccountByNumber(req, res);
+    public final Route transfer = ( req, res ) -> transferBalance( req, res );
 
     /**
-     * Initializes Account REST API Endpoint and exposes available API routes
+     * Initializes Balance REST API Endpoint routes
+     *
      * @param accountDAO required for Data interactions
      */
-    public AccountServiceController(AccountDao accountDAO) {
+    public BalanceController(AccountDao accountDAO) {
         this.accountDAO = accountDAO;
     }
 
-    /**
-     * Find all accounts endpoint with paging parameter
-     * @return all accounts array wrapped in a {@link StandardResponse} data and serialized as JSON string.
-     */
-    protected String findAllAccounts(Request req, Response res) {
+    protected String transferBalance(Request req, Response res) {
         res.type(APPLICATION_JSON);
         try {
             res.status(HttpServletResponse.SC_OK);
 
-            int pageNum = Integer.parseInt(req.queryParamOrDefault("pageNum", "0"));
-            int pageSize = Integer.parseInt(req.queryParamOrDefault("pageSize", "20"));
+            final TransferDTO transferDTO = gson.fromJson(req.body(), TransferDTO.class);
 
-            return respondOK(accountDAO.findAll(pageNum, pageSize));
+            accountDAO.transferBalance(transferDTO.fromAcct, transferDTO.toAcct, transferDTO.balance);
+
+            return respondOK(null);
         } catch (NumberFormatException e) {
             logger.debug(e.getMessage(), e);
 
             res.status(HttpServletResponse.SC_BAD_REQUEST);
             return respond(400, "Invalid number format for param 'pageNum' or 'pageSize");
-        } catch (RuntimeException e) {
-            logger.error(e.getMessage(), e);
-
-            res.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return respond(500, e.getMessage());
-        }
-    }
-
-    protected String findAccountByNumber(Request req, Response res) {
-        final String accountNumber = req.params("accountNumber");
-        Assert.notNull(accountNumber, "param accountNumber cannot be null");
-
-        res.type(APPLICATION_JSON);
-        try {
-            long accountNbr = Long.parseLong(accountNumber);
-
-            res.status(HttpServletResponse.SC_OK);
-
-            Account account = accountDAO.findByAccountNumber(accountNbr);
-
-            if (account != null) {
-                return respondOK(account);
-            } else {
-                return respond(404, "Account not found");
-            }
-        } catch (NumberFormatException e) {
+        } catch (IllegalArgumentException e) {
             logger.debug(e.getMessage(), e);
 
             res.status(HttpServletResponse.SC_BAD_REQUEST);
-            return respond(400, "Invalid number format for param 'accountNumber'");
+            return respond(400, e.getMessage());
         } catch (RuntimeException e) {
             logger.error(e.getMessage(), e);
 
@@ -140,6 +113,18 @@ public class AccountServiceController {
         @Override
         public String toString() {
             return "Response{" + "status='" + status + '\'' + ", message='" + message + '\'' + ", data=" + data + '}';
+        }
+    }
+
+    class TransferDTO implements Serializable {
+        final Long fromAcct;
+        final Long toAcct;
+        final BigDecimal balance;
+
+        TransferDTO(Long fromAcct, Long toAcct, BigDecimal balance) {
+            this.fromAcct = fromAcct;
+            this.toAcct = toAcct;
+            this.balance = balance;
         }
     }
 }

@@ -24,9 +24,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class AccountServiceControllerTest {
+public class AccountControllerTest {
 
-    private static AccountServiceController endpoint;
+    private static AccountController endpoint;
     private static Account[] testAccounts;
 
     private final Gson gson = new Gson();
@@ -38,7 +38,7 @@ public class AccountServiceControllerTest {
 
         AccountDao accountDAO = new AccountDaoJdbcImpl(new DBStorage("/test.db.properties"));
 
-        endpoint = new AccountServiceController(accountDAO);
+        endpoint = new AccountController(accountDAO);
 
         testAccounts = new Account[] {
                 accountDAO.create("first"),
@@ -60,8 +60,8 @@ public class AccountServiceControllerTest {
         verify(res).type(eq("application/json"));
         verify(res).status(eq(200));
 
-        final AccountServiceController.StandardResponse<ArrayList<Account>> standardResponse =
-                gson.fromJson(result, new TypeToken<AccountServiceController.StandardResponse<ArrayList<Account>>>(){}.getType());
+        final AccountController.StandardResponse<ArrayList<Account>> standardResponse =
+                gson.fromJson(result, new TypeToken<AccountController.StandardResponse<ArrayList<Account>>>(){}.getType());
 
         assertThat(standardResponse.status, equalTo(200));
         assertThat(standardResponse.message, equalTo("OK"));
@@ -82,8 +82,8 @@ public class AccountServiceControllerTest {
         verify(res).type(eq("application/json"));
         verify(res).status(eq(200));
 
-        final AccountServiceController.StandardResponse<Account> standardResponse =
-                gson.fromJson(result, new TypeToken<AccountServiceController.StandardResponse<Account>>(){}.getType());
+        final AccountController.StandardResponse<Account> standardResponse =
+                gson.fromJson(result, new TypeToken<AccountController.StandardResponse<Account>>(){}.getType());
 
         assertThat("response status", standardResponse.status, equalTo(200));
         assertThat("response message", standardResponse.message, equalTo("OK"));
