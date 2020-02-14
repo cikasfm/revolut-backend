@@ -1,0 +1,6 @@
+{
+  "name": "Thin Bank example.",
+  "description": "Ultra-simple bank account application. Supports create account, view account & transfer balance methods",
+  "repository": "https://github.com/cikasfm/revolut-backend",
+  "keywords": ["java", "sparkjava", "API", "bank", "transfer"]
+}
